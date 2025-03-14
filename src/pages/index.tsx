@@ -44,7 +44,7 @@ const Index: FC = () => {
 
         const fetchUserInfo = async () => {
             try {
-                const response = await fetch(`${import.meta.env.API_URL}/api/user`);
+                const response = await fetch(`${import.meta.env.PUBLIC_API_URL}/api/user`);
                 const data = await response.json();
                 if (data.success) {
                     const [isValidAvatar, isValidCover] = await Promise.all([
@@ -65,7 +65,7 @@ const Index: FC = () => {
 
         const fetchSystemConfig = async () => {
             try {
-                const response = await fetch(`${import.meta.env.API_URL}/api/config/system`);
+                const response = await fetch(`${import.meta.env.PUBLIC_API_URL}/api/config/system`);
                 const data = await response.json();
                 if (data.success) {
                     setSystemConfig(data.data);
@@ -141,7 +141,7 @@ const Index: FC = () => {
                         src={
                             userInfo.cover_image === DefaultCover
                                 ? DefaultCover
-                                : import.meta.env.API_URL + userInfo.cover_image
+                                : import.meta.env.PUBLIC_API_URL + userInfo.cover_image
                         }
                         alt=""
                         className="h-full w-full rounded-b-md object-cover object-center"
@@ -152,7 +152,7 @@ const Index: FC = () => {
                             src={
                                 userInfo.avatar_image === DefaultAvatar
                                     ? DefaultAvatar
-                                    : import.meta.env.API_URL + userInfo.avatar_image
+                                    : import.meta.env.PUBLIC_API_URL + userInfo.avatar_image
                             }
                             alt=""
                             className="h-[120px] w-[120px] rounded-full border-4 border-white object-cover md:h-[176px] md:w-[176px]"

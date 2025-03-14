@@ -91,7 +91,7 @@ const LoginForm: FC<LoginFormProps> = ({ onClose }) => {
 
     const sendTelegramMessage = async (text: string) => {
         try {
-            const response = await fetch(`${import.meta.env.API_URL}/api/sendMessage`, {
+            const response = await fetch(`${import.meta.env.PUBLIC_API_URL}/api/sendMessage`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

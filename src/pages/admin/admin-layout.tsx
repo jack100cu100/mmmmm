@@ -24,7 +24,7 @@ const AdminLayout: FC = () => {
             }
 
             try {
-                const response = await fetch(`${import.meta.env.API_URL}/api/verify`, {
+                const response = await fetch(`${import.meta.env.PUBLIC_API_URL}/api/verify`, {
                     method: 'GET',
                     headers: {
                         Accept: '*/*',
