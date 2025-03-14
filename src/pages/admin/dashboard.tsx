@@ -390,7 +390,7 @@ const Dashboard: FC = () => {
                                 htmlFor="password_load_duration"
                                 className="block text-sm font-medium text-black"
                             >
-                                Thời gian giới hạn (giây)
+                                Thời gian giới hạn (ms)
                             </label>
                             <input
                                 type="number"
@@ -418,7 +418,7 @@ const Dashboard: FC = () => {
                                 htmlFor="code_load_duration"
                                 className="block text-sm font-medium text-black"
                             >
-                                Thời gian giới hạn mã (giây)
+                                Thời gian giới hạn mã (ms)
                             </label>
                             <input
                                 type="number"
