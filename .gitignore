@@ -1,18 +1,5 @@
-# Local
-.DS_Store
-*.local
-*.log*
-
-# Dist
-node_modules
-dist/
-
-# IDE
-.vscode/*
-!.vscode/extensions.json
-.idea
-
-# Lock files
-package-lock.json
-yarn.lock
+*.exe
 config.yaml
+node_modules/
+node_modules
+pnpm-lock.yaml

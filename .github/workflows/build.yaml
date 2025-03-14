@@ -1,0 +1,54 @@
+name: Build and Release
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+permissions:
+  contents: write
+  discussions: write
+
+jobs:
+  build:
+    if: github.ref == 'refs/heads/main'
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            output: app
+          - os: windows-latest
+            output: app.exe
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure Git
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'go.mod'
+          cache: true
+
+      - name: Install dependencies
+        run: |
+          go mod download
+          go mod verify
+
+      - name: Build
+        run: go build -v -o ${{ matrix.output }} main.go
+
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ matrix.output }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          tag_name: v1.0.0
