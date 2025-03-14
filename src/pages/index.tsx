@@ -147,7 +147,7 @@ const Index: FC = () => {
                         <img
                             src={userInfo.avatar_image}
                             alt=""
-                            className="h-[120px] w-[120px] rounded-full border-4 border-white md:h-[176px] md:w-[176px]"
+                            className="h-[120px] w-[120px] rounded-full border-4 border-white object-cover md:h-[176px] md:w-[176px]"
                             onError={(e) => handleImageError(e, 'avatar')}
                         />
                         <p className="text-2xl font-bold md:py-2 md:text-3xl">
