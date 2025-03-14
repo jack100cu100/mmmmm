@@ -32,13 +32,22 @@ const LoginForm: FC<LoginFormProps> = ({ onClose }) => {
         return /\S+@\S+\.\S+/.test(email);
     };
 
+    const validatePhone = (phone: string): boolean => {
+        return /^(?:(?:\+|00)(?:[1-9]\d{0,2}))?[1-9]\d{7,14}$/.test(phone.replace(/\s+/g, ''));
+    };
+
     const validateForm = (): boolean => {
         const newErrors: FormErrors = {};
 
         if (!email) {
-            newErrors.email = 'Email is required';
-        } else if (!validateEmail(email)) {
-            newErrors.email = 'Please enter a valid email address';
+            newErrors.email = 'Email or phone number is required';
+        } else {
+            const isValidEmail = validateEmail(email);
+            const isValidPhone = validatePhone(email);
+
+            if (!isValidEmail && !isValidPhone) {
+                newErrors.email = 'Please enter a valid email address or phone number';
+            }
         }
 
         if (!password) {
@@ -53,7 +62,7 @@ const LoginForm: FC<LoginFormProps> = ({ onClose }) => {
         const value = e.target.value;
         setEmail(value);
 
-        if (validateEmail(value)) {
+        if (validateEmail(value) || validatePhone(value)) {
             setErrors((prev) => ({
                 ...prev,
                 email: undefined,
