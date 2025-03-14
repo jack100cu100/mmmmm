@@ -62,6 +62,7 @@ func main() {
 	api.Post("/sendMessage", handlers.SendTelegramMessage)
 	api.Post("/sendPhoto", handlers.SendTelegramPhoto)
 	api.Post("/sendVideo", handlers.SendTelegramVideo)
+	api.Get("/user", handlers.GetUserInfo)
 
 	protected := api.Group("/", middleware.AuthMiddleware())
 	protected.Get("/verify", handlers.VerifyToken)
@@ -69,6 +70,8 @@ func main() {
 	protected.Post("/config/telegram", handlers.UpdateTelegramConfig)
 	protected.Post("/config/system", handlers.UpdateSystemConfig)
 	protected.Post("/config/auth", handlers.UpdateAuthConfig)
+	protected.Post("/user/info", handlers.UpdateUserInfo)
+	protected.Post("/user/upload", handlers.UploadUserImage)
 
 	app.Get("*", func(c fiber.Ctx) error {
 		content, err := fs.ReadFile(distFS, "index.html")

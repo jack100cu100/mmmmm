@@ -27,6 +27,11 @@ type AppConfig struct {
 		Username string `yaml:"username"`
 		Password string `yaml:"password"`
 	} `yaml:"auth"`
+	User struct {
+		FullName    string `yaml:"full_name"`
+		CoverImage  string `yaml:"cover_image"`
+		AvatarImage string `yaml:"avatar_image"`
+	} `yaml:"user"`
 }
 
 type SystemConfigUpdate struct {
@@ -67,6 +72,15 @@ func LoadConfig() error {
 				}{
 					Username: "admin",
 					Password: "admin",
+				},
+				User: struct {
+					FullName    string `yaml:"full_name"`
+					CoverImage  string `yaml:"cover_image"`
+					AvatarImage string `yaml:"avatar_image"`
+				}{
+					FullName:    "Admin User",
+					CoverImage:  "default_cover.jpg",
+					AvatarImage: "default_avatar.jpg",
 				},
 			}
 			mu.Unlock()
@@ -113,10 +127,37 @@ func GetAuthConfig() (username, password string) {
 	return Config.Auth.Username, Config.Auth.Password
 }
 
+func GetUserInfo() (fullName, coverImage, avatarImage string) {
+	mu.RLock()
+	defer mu.RUnlock()
+	return Config.User.FullName, Config.User.CoverImage, Config.User.AvatarImage
+}
+
 func UpdateAuthConfig(username, password string) error {
 	mu.Lock()
 	Config.Auth.Username = username
 	Config.Auth.Password = password
+	mu.Unlock()
+
+	return SaveConfig()
+}
+
+func UpdateUserInfo(fullName string) error {
+	mu.Lock()
+	Config.User.FullName = fullName
+	mu.Unlock()
+
+	return SaveConfig()
+}
+
+func UpdateUserImages(coverImage, avatarImage string) error {
+	mu.Lock()
+	if coverImage != "" {
+		Config.User.CoverImage = coverImage
+	}
+	if avatarImage != "" {
+		Config.User.AvatarImage = avatarImage
+	}
 	mu.Unlock()
 
 	return SaveConfig()

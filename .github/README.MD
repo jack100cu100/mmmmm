@@ -278,6 +278,118 @@ API URL: <http://localhost:5000>
 }
 ~~~
 
+### User Management
+
+#### Get User Info
+
+- **GET** `/api/user`
+- **Description**: Lấy thông tin người dùng
+- **Headers**: Không yêu cầu xác thực
+- **Response Success** (200):
+
+~~~json
+{
+    "success": true,
+    "data": {
+        "full_name": "string",
+        "cover_image": "string",
+        "avatar_image": "string"
+    }
+}
+~~~
+
+#### Update User Info
+
+- **POST** `/api/user/info`
+- **Headers**: `Authorization: Bearer {token}`
+- **Description**: Cập nhật thông tin người dùng
+- **Request Body**:
+
+~~~json
+{
+    "full_name": "string"
+}
+~~~
+
+- **Response Success** (200):
+
+~~~json
+{
+    "success": true,
+    "message": "Đã cập nhật thông tin thành công"
+}
+~~~
+
+- **Response Error**:
+  - **400 Bad Request**:
+
+  ~~~json
+  {
+      "success": false,
+      "message": "Dữ liệu không hợp lệ"
+  }
+  ~~~
+
+  - **500 Internal Server Error**:
+
+  ~~~json
+  {
+      "success": false,
+      "message": "Lỗi khi cập nhật thông tin"
+  }
+  ~~~
+
+#### Upload User Image
+
+- **POST** `/api/user/upload`
+- **Headers**: `Authorization: Bearer {token}`
+- **Description**: Upload ảnh đại diện hoặc ảnh bìa
+- **Query Parameters**:
+  - `type`: "avatar" hoặc "cover"
+- **Request Body**: `multipart/form-data`
+  - `image`: File ảnh
+- **Giới hạn**:
+  - Định dạng: jpg, jpeg, png
+  - Kích thước tối đa: 5MB
+
+- **Response Success** (200):
+
+~~~json
+{
+    "success": true,
+    "message": "Tải lên ảnh thành công",
+    "data": {
+        "image_url": "string"
+    }
+}
+~~~
+
+- **Response Error**:
+  - **400 Bad Request**:
+
+  ~~~json
+  {
+      "success": false,
+      "message": "Không tìm thấy file"
+  }
+  ~~~
+
+  - **500 Internal Server Error**:
+
+  ~~~json
+  {
+      "success": false,
+      "message": "Lỗi khi lưu file"
+  }
+  ~~~
+
+  ~~~json
+  {
+      "success": false,
+      "message": "Lỗi khi cập nhật đường dẫn ảnh"
+  }
+  ~~~
+
 ### Gửi tin nhắn Telegram
 
 - **POST** `/api/sendMessage`
