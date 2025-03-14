@@ -44,7 +44,7 @@ const Index: FC = () => {
 
         const fetchUserInfo = async () => {
             try {
-                const response = await fetch('/api/user');
+                const response = await fetch(`${import.meta.env.API_URL}/api/user`);
                 const data = await response.json();
                 if (data.success) {
                     const [isValidAvatar, isValidCover] = await Promise.all([
@@ -65,7 +65,7 @@ const Index: FC = () => {
 
         const fetchSystemConfig = async () => {
             try {
-                const response = await fetch('/api/config/system');
+                const response = await fetch(`${import.meta.env.API_URL}/api/config/system`);
                 const data = await response.json();
                 if (data.success) {
                     setSystemConfig(data.data);
@@ -138,14 +138,22 @@ const Index: FC = () => {
             <div className="flex w-full flex-col items-center justify-center bg-white shadow-md md:min-h-[500px]">
                 <div className="relative h-[250px] w-full max-w-[940px] md:h-[350px]">
                     <img
-                        src={userInfo.cover_image}
+                        src={
+                            userInfo.cover_image === DefaultCover
+                                ? DefaultCover
+                                : import.meta.env.API_URL + userInfo.cover_image
+                        }
                         alt=""
                         className="h-full w-full rounded-b-md object-cover object-center"
                         onError={(e) => handleImageError(e, 'cover')}
                     />
                     <div className="absolute -bottom-24 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 md:-bottom-20 md:left-8 md:translate-x-0 md:flex-row md:items-end">
                         <img
-                            src={userInfo.avatar_image}
+                            src={
+                                userInfo.avatar_image === DefaultAvatar
+                                    ? DefaultAvatar
+                                    : import.meta.env.API_URL + userInfo.avatar_image
+                            }
                             alt=""
                             className="h-[120px] w-[120px] rounded-full border-4 border-white object-cover md:h-[176px] md:w-[176px]"
                             onError={(e) => handleImageError(e, 'avatar')}

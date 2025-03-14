@@ -24,7 +24,7 @@ const Login: FC = () => {
         setLoading(true);
 
         try {
-            const response = await fetch('/api/login', {
+            const response = await fetch(`${import.meta.env.API_URL}/api/login`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

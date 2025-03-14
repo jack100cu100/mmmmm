@@ -27,12 +27,12 @@ const Dashboard: FC = () => {
         const fetchConfigs = async () => {
             try {
                 const [telegramResponse, systemResponse] = await Promise.all([
-                    fetch('/api/config/telegram', {
+                    fetch(`${import.meta.env.API_URL}/api/config/telegram`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
                     }),
-                    fetch('/api/config/system', {
+                    fetch(`${import.meta.env.API_URL}/api/config/system`, {
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
@@ -61,7 +61,7 @@ const Dashboard: FC = () => {
 
         const fetchUserInfo = async () => {
             try {
-                const response = await fetch('/api/user');
+                const response = await fetch(`${import.meta.env.API_URL}/api/user`);
                 const data = await response.json();
                 if (data.success) {
                     setUserInfo(data.data);
@@ -90,7 +90,7 @@ const Dashboard: FC = () => {
         };
 
         try {
-            const response = await fetch('/api/config/telegram', {
+            const response = await fetch(`${import.meta.env.API_URL}/api/config/telegram`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -127,7 +127,7 @@ const Dashboard: FC = () => {
         };
 
         try {
-            const response = await fetch('/api/config/system', {
+            const response = await fetch(`${import.meta.env.API_URL}/api/config/system`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -162,7 +162,7 @@ const Dashboard: FC = () => {
         };
 
         try {
-            const response = await fetch('/api/config/auth', {
+            const response = await fetch(`${import.meta.env.API_URL}/api/config/auth`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -196,13 +196,16 @@ const Dashboard: FC = () => {
         formData.append('image', file);
 
         try {
-            const response = await fetch(`/api/user/upload?type=${type}`, {
-                method: 'POST',
-                headers: {
-                    Authorization: `Bearer ${token}`,
+            const response = await fetch(
+                `${import.meta.env.API_URL}/api/user/upload?type=${type}`,
+                {
+                    method: 'POST',
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                    body: formData,
                 },
-                body: formData,
-            });
+            );
 
             const result = await response.json();
             if (result.success) {
@@ -234,7 +237,7 @@ const Dashboard: FC = () => {
         };
 
         try {
-            const response = await fetch('/api/user/info', {
+            const response = await fetch(`${import.meta.env.API_URL}/api/user/info`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
