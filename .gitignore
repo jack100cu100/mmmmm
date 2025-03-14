@@ -16,3 +16,5 @@ dist/
 package-lock.json
 yarn.lock
 config.yaml
+app.exe
+.env

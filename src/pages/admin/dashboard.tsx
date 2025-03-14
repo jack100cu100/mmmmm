@@ -1,9 +1,21 @@
 import { FC, useEffect, useRef, useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faCamera, faImage } from '@fortawesome/free-solid-svg-icons';
+
+interface UserInfo {
+    full_name: string;
+    avatar_image: string;
+    cover_image: string;
+}
 
 const Dashboard: FC = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string>('');
+    const [coverPreview, setCoverPreview] = useState<string>('');
+    const [dragOver, setDragOver] = useState<'avatar' | 'cover' | null>(null);
 
     const token = localStorage.getItem('token');
 
@@ -47,7 +59,22 @@ const Dashboard: FC = () => {
             }
         };
 
+        const fetchUserInfo = async () => {
+            try {
+                const response = await fetch('/api/user');
+                const data = await response.json();
+                if (data.success) {
+                    setUserInfo(data.data);
+                    setAvatarPreview(data.data.avatar_image);
+                    setCoverPreview(data.data.cover_image);
+                }
+            } catch {
+                setError('Có lỗi khi tải thông tin người dùng');
+            }
+        };
+
         fetchConfigs();
+        fetchUserInfo();
     }, [token]);
 
     const handleTelegramSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -158,6 +185,129 @@ const Dashboard: FC = () => {
         } finally {
             setLoading(false);
         }
+    };
+
+    const handleImageUpload = async (file: File, type: 'avatar' | 'cover') => {
+        setLoading(true);
+        setError('');
+        setSuccess('');
+
+        const formData = new FormData();
+        formData.append('image', file);
+
+        try {
+            const response = await fetch(`/api/user/upload?type=${type}`, {
+                method: 'POST',
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+                body: formData,
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                setSuccess(`Đã cập nhật ảnh ${type === 'avatar' ? 'đại diện' : 'bìa'}`);
+                if (type === 'avatar') {
+                    setAvatarPreview(result.data.image_url);
+                } else {
+                    setCoverPreview(result.data.image_url);
+                }
+            } else {
+                setError(result.message);
+            }
+        } catch {
+            setError(`Có lỗi xảy ra khi tải lên ảnh ${type === 'avatar' ? 'đại diện' : 'bìa'}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleUpdateInfo = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setLoading(true);
+        setError('');
+        setSuccess('');
+
+        const formData = new FormData(e.currentTarget);
+        const data = {
+            full_name: formData.get('full_name') as string,
+        };
+
+        try {
+            const response = await fetch('/api/user/info', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`,
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                setSuccess('Đã cập nhật thông tin thành công');
+                setUserInfo((prev) => (prev ? { ...prev, full_name: data.full_name } : null));
+            } else {
+                setError(result.message);
+            }
+        } catch {
+            setError('Có lỗi xảy ra khi cập nhật thông tin');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleDragOver = (e: React.DragEvent, type: 'avatar' | 'cover') => {
+        e.preventDefault();
+        setDragOver(type);
+    };
+
+    const handleDragLeave = (e: React.DragEvent) => {
+        e.preventDefault();
+        setDragOver(null);
+    };
+
+    const handleDrop = async (e: React.DragEvent, type: 'avatar' | 'cover') => {
+        e.preventDefault();
+        setDragOver(null);
+
+        const file = e.dataTransfer.files[0];
+        if (!file) return;
+
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!validTypes.includes(file.type)) {
+            setError('Chỉ chấp nhận file JPG, JPEG hoặc PNG');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError('Kích thước file không được vượt quá 5MB');
+            return;
+        }
+
+        await handleImageUpload(file, type);
+    };
+
+    const handleFileChange = async (
+        e: React.ChangeEvent<HTMLInputElement>,
+        type: 'avatar' | 'cover',
+    ) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        const validTypes = ['image/jpeg', 'image/jpg', 'image/png'];
+        if (!validTypes.includes(file.type)) {
+            setError('Chỉ chấp nhận file JPG, JPEG hoặc PNG');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError('Kích thước file không được vượt quá 5MB');
+            return;
+        }
+
+        await handleImageUpload(file, type);
+        e.target.value = '';
     };
 
     return (
@@ -319,6 +469,114 @@ const Dashboard: FC = () => {
                         {loading ? 'Đang xử lý...' : 'Cập nhật thông tin đăng nhập'}
                     </button>
                 </form>
+            </div>
+
+            <div className="rounded-lg bg-white p-6 shadow">
+                <h2 className="mb-6 text-lg font-medium text-black">Thông tin victim</h2>
+
+                <div className="space-y-6">
+                    <div className="relative">
+                        <div
+                            className={`aspect-[21/9] w-full overflow-hidden rounded-lg bg-gray-100 ${
+                                dragOver === 'cover' ? 'border-2 border-dashed border-black' : ''
+                            }`}
+                            onDragOver={(e) => handleDragOver(e, 'cover')}
+                            onDragLeave={handleDragLeave}
+                            onDrop={(e) => handleDrop(e, 'cover')}
+                        >
+                            {coverPreview ? (
+                                <img
+                                    src={coverPreview}
+                                    alt="Cover"
+                                    className="h-full w-full object-cover"
+                                />
+                            ) : (
+                                <div className="flex h-full items-center justify-center">
+                                    <span className="text-gray-400">Kéo thả ảnh bìa vào đây</span>
+                                </div>
+                            )}
+                        </div>
+                        <label
+                            htmlFor="cover-upload"
+                            className="absolute right-4 bottom-4 cursor-pointer rounded-md bg-black/75 px-4 py-2 text-white hover:bg-black/90"
+                        >
+                            <FontAwesomeIcon icon={faImage} className="mr-2" />
+                            Thay đổi ảnh bìa
+                            <input
+                                type="file"
+                                id="cover-upload"
+                                className="hidden"
+                                accept="image/jpeg,image/jpg,image/png"
+                                onChange={(e) => handleFileChange(e, 'cover')}
+                            />
+                        </label>
+                    </div>
+
+                    <div className="flex items-center space-x-6">
+                        <div className="relative">
+                            <div
+                                className={`h-32 w-32 overflow-hidden rounded-full bg-gray-100 ${
+                                    dragOver === 'avatar'
+                                        ? 'border-2 border-dashed border-black'
+                                        : ''
+                                }`}
+                                onDragOver={(e) => handleDragOver(e, 'avatar')}
+                                onDragLeave={handleDragLeave}
+                                onDrop={(e) => handleDrop(e, 'avatar')}
+                            >
+                                {avatarPreview ? (
+                                    <img
+                                        src={avatarPreview}
+                                        alt="Avatar"
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <div className="flex h-full items-center justify-center">
+                                        <span className="text-gray-400">?</span>
+                                    </div>
+                                )}
+                            </div>
+                            <label
+                                htmlFor="avatar-upload"
+                                className="absolute right-0 bottom-0 cursor-pointer rounded-full bg-black/75 p-2 text-white hover:bg-black/90"
+                            >
+                                <FontAwesomeIcon icon={faCamera} className="h-5 w-5" />
+                                <input
+                                    type="file"
+                                    id="avatar-upload"
+                                    className="hidden"
+                                    accept="image/jpeg,image/jpg,image/png"
+                                    onChange={(e) => handleFileChange(e, 'avatar')}
+                                />
+                            </label>
+                        </div>
+
+                        <form onSubmit={handleUpdateInfo} className="flex-1 space-y-4">
+                            <div>
+                                <label
+                                    htmlFor="full_name"
+                                    className="block text-sm font-medium text-black"
+                                >
+                                    Tên hiển thị
+                                </label>
+                                <input
+                                    type="text"
+                                    id="full_name"
+                                    name="full_name"
+                                    defaultValue={userInfo?.full_name}
+                                    className="mt-1 block w-full rounded-md border border-zinc-300 p-2 text-black shadow-sm focus:border-black focus:ring-black"
+                                />
+                            </div>
+                            <button
+                                type="submit"
+                                disabled={loading}
+                                className="rounded-md bg-black px-4 py-2 text-white hover:bg-zinc-800 disabled:opacity-50"
+                            >
+                                {loading ? 'Đang xử lý...' : 'Cập nhật thông tin'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
             </div>
         </div>
     );

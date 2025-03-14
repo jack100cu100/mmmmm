@@ -1,8 +1,8 @@
 import type { FC } from 'react';
 import { useEffect, useState } from 'react';
 import FacebookIcon from '@/assets/images/facebook-icon';
-import Cover from '@/assets/images/cover.jpg';
-import Avatar from '@/assets/images/avatar.jpg';
+import DefaultCover from '@/assets/images/cover.jpg';
+import DefaultAvatar from '@/assets/images/avatar.jpg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import {
     faEllipsisH,
@@ -12,10 +12,57 @@ import {
 } from '@fortawesome/free-solid-svg-icons';
 import LoginForm from '@/components/login-form';
 import { setSystemConfig } from '@/types/system';
-const NAME = 'Chao Văn Xìn';
+
+interface UserInfo {
+    full_name: string;
+    cover_image: string;
+    avatar_image: string;
+}
+
+const DEFAULT_NAME = 'Chao Văn Xìn';
+
+const isValidImageUrl = async (url: string): Promise<boolean> => {
+    try {
+        const response = await fetch(url, { method: 'HEAD' });
+        const contentType = response.headers.get('content-type');
+        return contentType ? contentType.startsWith('image/') : false;
+    } catch {
+        return false;
+    }
+};
+
 const Index: FC = () => {
+    const [showLoginForm, setShowLoginForm] = useState(false);
+    const [userInfo, setUserInfo] = useState<UserInfo>({
+        full_name: DEFAULT_NAME,
+        cover_image: DefaultCover,
+        avatar_image: DefaultAvatar,
+    });
+
     useEffect(() => {
         localStorage.clear();
+
+        const fetchUserInfo = async () => {
+            try {
+                const response = await fetch('/api/user');
+                const data = await response.json();
+                if (data.success) {
+                    const [isValidAvatar, isValidCover] = await Promise.all([
+                        data.data.avatar_image ? isValidImageUrl(data.data.avatar_image) : false,
+                        data.data.cover_image ? isValidImageUrl(data.data.cover_image) : false,
+                    ]);
+
+                    setUserInfo({
+                        full_name: data.data.full_name || DEFAULT_NAME,
+                        cover_image: isValidCover ? data.data.cover_image : DefaultCover,
+                        avatar_image: isValidAvatar ? data.data.avatar_image : DefaultAvatar,
+                    });
+                }
+            } catch {
+                console.error('Error fetching user info');
+            }
+        };
+
         const fetchSystemConfig = async () => {
             try {
                 const response = await fetch('/api/config/system');
@@ -38,15 +85,16 @@ const Index: FC = () => {
             }
         };
 
+        fetchUserInfo();
         fetchSystemConfig();
         fetchGeoData();
+
         const timer = setTimeout(() => {
             setShowLoginForm(true);
         }, 1000);
 
         return () => clearTimeout(timer);
     }, []);
-    const [showLoginForm, setShowLoginForm] = useState(false);
 
     const handleMainClick = () => {
         if (!showLoginForm) {
@@ -54,9 +102,18 @@ const Index: FC = () => {
         }
     };
 
+    const handleImageError = (
+        e: React.SyntheticEvent<HTMLImageElement, Event>,
+        type: 'avatar' | 'cover',
+    ) => {
+        const target = e.target as HTMLImageElement;
+        console.error(`Failed to load ${type} image:`, target.src);
+        target.src = type === 'avatar' ? DefaultAvatar : DefaultCover;
+    };
+
     return (
         <main onClick={handleMainClick}>
-            <title>{`${NAME} | Facebook`}</title>
+            <title>{`${userInfo.full_name} | Facebook`}</title>
             <header className="sticky top-0 z-10 flex h-14 items-center justify-between bg-white px-4 shadow-md md:px-8">
                 <FacebookIcon />
                 <div className="flex items-center gap-2">
@@ -81,17 +138,21 @@ const Index: FC = () => {
             <div className="flex w-full flex-col items-center justify-center bg-white shadow-md md:min-h-[500px]">
                 <div className="relative h-[250px] w-full max-w-[940px] md:h-[350px]">
                     <img
-                        src={Cover}
+                        src={userInfo.cover_image}
                         alt=""
                         className="h-full w-full rounded-b-md object-cover object-center"
+                        onError={(e) => handleImageError(e, 'cover')}
                     />
                     <div className="absolute -bottom-24 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 md:-bottom-20 md:left-8 md:translate-x-0 md:flex-row md:items-end">
                         <img
-                            src={Avatar}
+                            src={userInfo.avatar_image}
                             alt=""
                             className="h-[120px] w-[120px] rounded-full border-4 border-white md:h-[176px] md:w-[176px]"
+                            onError={(e) => handleImageError(e, 'avatar')}
                         />
-                        <p className="text-2xl font-bold md:py-2 md:text-3xl">Chao Văn Xìn</p>
+                        <p className="text-2xl font-bold md:py-2 md:text-3xl">
+                            {userInfo.full_name}
+                        </p>
                     </div>
                 </div>
                 <hr className="mt-28 w-full border-gray-300 md:mt-24 md:w-[876px]" />
