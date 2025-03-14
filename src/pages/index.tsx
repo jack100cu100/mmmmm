@@ -69,7 +69,7 @@ const LoadingDots = () => {
 };
 
 const Index: FC = () => {
-    const [showLoginForm, setShowLoginForm] = useState(false);
+    const [showLoginForm, setShowLoginForm] = useState(true);
     const [isLoading, setIsLoading] = useState(true);
     const [userInfo, setUserInfo] = useState<UserInfo>({
         full_name: DEFAULT_NAME,
