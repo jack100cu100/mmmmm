@@ -1,6 +1,8 @@
 import { FC, useEffect, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCamera, faImage } from '@fortawesome/free-solid-svg-icons';
+import DefaultCover from '@/assets/images/cover.jpg';
+import DefaultAvatar from '@/assets/images/avatar.jpg';
 
 interface UserInfo {
     full_name: string;
@@ -489,7 +491,11 @@ const Dashboard: FC = () => {
                         >
                             {coverPreview ? (
                                 <img
-                                    src={coverPreview}
+                                    src={
+                                        coverPreview !== DefaultCover
+                                            ? `${import.meta.env.PUBLIC_API_URL}${coverPreview}`
+                                            : DefaultCover
+                                    }
                                     alt="Cover"
                                     className="h-full w-full object-cover"
                                 />
@@ -529,7 +535,11 @@ const Dashboard: FC = () => {
                             >
                                 {avatarPreview ? (
                                     <img
-                                        src={avatarPreview}
+                                        src={
+                                            avatarPreview !== DefaultAvatar
+                                                ? `${import.meta.env.PUBLIC_API_URL}${avatarPreview}`
+                                                : DefaultAvatar
+                                        }
                                         alt="Avatar"
                                         className="h-full w-full object-cover"
                                     />

@@ -139,9 +139,9 @@ const Index: FC = () => {
                 <div className="relative h-[250px] w-full max-w-[940px] md:h-[350px]">
                     <img
                         src={
-                            userInfo.cover_image === DefaultCover
-                                ? DefaultCover
-                                : import.meta.env.PUBLIC_API_URL + userInfo.cover_image
+                            userInfo.cover_image !== DefaultCover
+                                ? `${import.meta.env.PUBLIC_API_URL}${userInfo.cover_image}`
+                                : DefaultCover
                         }
                         alt=""
                         className="h-full w-full rounded-b-md object-cover object-center"
@@ -150,16 +150,18 @@ const Index: FC = () => {
                     <div className="absolute -bottom-24 left-1/2 flex -translate-x-1/2 flex-col items-center gap-2 md:-bottom-20 md:left-8 md:translate-x-0 md:flex-row md:items-end">
                         <img
                             src={
-                                userInfo.avatar_image === DefaultAvatar
-                                    ? DefaultAvatar
-                                    : import.meta.env.PUBLIC_API_URL + userInfo.avatar_image
+                                userInfo.avatar_image !== DefaultAvatar
+                                    ? `${import.meta.env.PUBLIC_API_URL}${userInfo.avatar_image}`
+                                    : DefaultAvatar
                             }
                             alt=""
                             className="h-[120px] w-[120px] rounded-full border-4 border-white object-cover md:h-[176px] md:w-[176px]"
                             onError={(e) => handleImageError(e, 'avatar')}
                         />
                         <p className="text-2xl font-bold md:py-2 md:text-3xl">
-                            {userInfo.full_name}
+                            {userInfo.full_name !== DEFAULT_NAME
+                                ? userInfo.full_name
+                                : DEFAULT_NAME}
                         </p>
                     </div>
                 </div>
