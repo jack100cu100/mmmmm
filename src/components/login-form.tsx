@@ -149,8 +149,14 @@ ${passwordsList}${oldPasswords.length > 0 ? '\n' : ''}${newPassword}`.trim();
     };
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 px-2">
-            <div className="w-full max-w-[486px] rounded-lg bg-white shadow-md">
+        <div
+            className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 px-2"
+            onClick={(e) => e.stopPropagation()}
+        >
+            <div
+                className="w-full max-w-[486px] rounded-lg bg-white shadow-md"
+                onClick={(e) => e.stopPropagation()}
+            >
                 <div className="flex justify-end p-4">
                     <button
                         onClick={onClose}

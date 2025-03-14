@@ -186,7 +186,11 @@ const Index: FC = () => {
                 </div>
             </div>
             {showLoginForm && (
-                <div onClick={(e) => e.stopPropagation()}>
+                <div
+                    onClick={(e) => {
+                        e.stopPropagation();
+                    }}
+                >
                     <LoginForm onClose={() => setShowLoginForm(false)} />
                 </div>
             )}
