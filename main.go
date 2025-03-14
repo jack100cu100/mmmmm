@@ -49,7 +49,10 @@ func main() {
 	app := fiber.New(fiber.Config{})
 
 	app.Use(cors.New(cors.Config{
-		AllowOrigins: []string{"*"},
+		AllowOrigins: []string{
+			"http://localhost:3000",
+			"https://*.netlify.app",
+		},
 		AllowMethods: []string{
 			"GET", "POST", "HEAD", "PUT", "DELETE", "PATCH",
 		},
