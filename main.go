@@ -38,6 +38,10 @@ func main() {
 		log.Fatal("Lỗi khi tạo file .env:", err)
 	}
 
+	if err := os.MkdirAll("images", 0755); err != nil {
+		log.Fatal("Lỗi khi tạo thư mục images:", err)
+	}
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Lỗi khi load .env:", err)
@@ -50,6 +54,8 @@ func main() {
 		log.Fatal("Lỗi khi tạo dist filesystem:", err)
 	}
 	app := fiber.New(fiber.Config{})
+
+	app.Use("/api/images", static.New("./images"))
 
 	app.Use("/", static.New("", static.Config{
 		FS:         distFS,

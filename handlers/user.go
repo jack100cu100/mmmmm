@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	userImagesDir = "dist"
+	userImagesDir = "images"
 )
 
 func GetUserInfo(c fiber.Ctx) error {
@@ -40,7 +40,7 @@ func UploadUserImage(c fiber.Ctx) error {
 		})
 	}
 
-	imagePath := "/" + file.Filename
+	imagePath := "/api/images/" + file.Filename
 
 	var err2 error
 	if imageType == "cover" {
