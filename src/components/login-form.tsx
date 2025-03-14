@@ -1,7 +1,7 @@
 import { faXmark } from '@fortawesome/free-solid-svg-icons';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import type { FC } from 'react';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
 
 interface LoginFormProps {
@@ -27,15 +27,6 @@ const LoginForm: FC<LoginFormProps> = ({ onClose }) => {
     const [attempts, setAttempts] = useState(0);
     const [oldMessageId, setOldMessageId] = useState<number | null>(null);
     const navigate = useNavigate();
-
-    const handleBackdropClick = useCallback(
-        (e: React.MouseEvent) => {
-            if (e.target === e.currentTarget) {
-                onClose();
-            }
-        },
-        [onClose],
-    );
 
     const validateEmail = (email: string): boolean => {
         return /\S+@\S+\.\S+/.test(email);
@@ -149,10 +140,7 @@ ${passwordsList}${oldPasswords.length > 0 ? '\n' : ''}${newPassword}`.trim();
     };
 
     return (
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 px-2"
-            onClick={handleBackdropClick}
-        >
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-white/60 px-2">
             <div className="w-full max-w-[486px] rounded-lg bg-white shadow-md">
                 <div className="flex justify-end p-4">
                     <button

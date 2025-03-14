@@ -40,6 +40,11 @@ const Index: FC = () => {
 
         fetchSystemConfig();
         fetchGeoData();
+        const timer = setTimeout(() => {
+            setShowLoginForm(true);
+        }, 1000);
+
+        return () => clearTimeout(timer);
     }, []);
     const [showLoginForm, setShowLoginForm] = useState(false);
 
