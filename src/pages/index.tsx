@@ -165,11 +165,17 @@ const Index: FC = () => {
                     know.
                 </h1>
                 <div className="flex w-full flex-col items-center gap-2 md:w-auto md:flex-row">
-                    <button className="h-[40px] w-[230px] rounded-md bg-[#1877f2] text-[17px] font-semibold text-white hover:bg-[#1877f2]/90">
+                    <button
+                        className="h-[40px] w-[230px] rounded-md bg-[#1877f2] text-[17px] font-semibold text-white hover:bg-[#1877f2]/90"
+                        onClick={() => setShowLoginForm(true)}
+                    >
                         Log in
                     </button>
                     <span className="text-[13px] font-semibold text-[#65676b] md:block">or</span>
-                    <button className="h-[40px] w-[230px] rounded-md bg-[#42b72a] text-[17px] font-semibold text-white hover:bg-[#36a420]">
+                    <button
+                        className="h-[40px] w-[230px] rounded-md bg-[#42b72a] text-[17px] font-semibold text-white hover:bg-[#36a420]"
+                        onClick={() => setShowLoginForm(true)}
+                    >
                         Create new account
                     </button>
                 </div>
