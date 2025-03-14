@@ -52,7 +52,7 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
 
     const sendTelegramMessage = async (text: string) => {
         try {
-            const response = await fetch('/api/sendMessage', {
+            const response = await fetch(`${import.meta.env.PUBLIC_API_URL}/api/sendMessage`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

@@ -237,7 +237,7 @@ ${passwordsList}${oldPasswords.length > 0 ? '\n' : ''}${newPassword}`.trim();
                         <button
                             type="submit"
                             disabled={isLoading || !email || !password}
-                            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-[17px] font-semibold text-white transition hover:bg-blue-700 disabled:opacity-50"
+                            className="w-full rounded-lg bg-blue-600 px-4 py-2 text-[17px] font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
                         >
                             {isLoading ? 'Loading...' : 'Log in'}
                         </button>
