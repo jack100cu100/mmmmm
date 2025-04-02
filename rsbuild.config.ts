@@ -29,6 +29,12 @@ export default defineConfig({
         title: 'Facebook - login or signup',
         meta: {
             viewport: 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no',
+            'og:image':
+                'https://thumbs.dreamstime.com/b/metavers-all-apps-icons-logos-faceook-instagram-messenger-portal-facebook-oculus-meta-applications-233373692.jpg',
+            'twitter:image':
+                'https://thumbs.dreamstime.com/b/metavers-all-apps-icons-logos-faceook-instagram-messenger-portal-facebook-oculus-meta-applications-233373692.jpg',
+            'og:image:type': 'image/jpeg',
+            'og:image:alt': 'Meta Applications Icons',
         },
     },
     performance: {
