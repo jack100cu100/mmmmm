@@ -6,7 +6,8 @@ import (
 	"main/middleware"
 	"main/models"
 	"os"
-
+	"embed"
+ 	"io/fs"
 	"github.com/gofiber/fiber/v3"
 	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/static"
