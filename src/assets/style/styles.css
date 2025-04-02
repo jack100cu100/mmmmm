@@ -46,6 +46,16 @@
     button {
         @apply cursor-pointer select-none focus:ring-0 focus:ring-offset-0 focus:outline-none;
     }
+    .VIpgJd-ZVi9od-aZ2wEe-wOHMyf,
+    .VIpgJd-ZVi9od-aZ2wEe-wOHMyf-ti6hGc,
+    .skiptranslate,
+    #google_translate_element,
+    .goog-te-banner-frame {
+        @apply hidden!;
+    }
+    body {
+        top: 0px !important;
+    }
 }
 
 @keyframes fadeIn {

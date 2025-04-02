@@ -3,7 +3,12 @@ import { useState, useEffect, useRef } from 'react';
 import Image from '@/assets/images/authentication-app-image.png';
 import '@/assets/fonts/Optimistic.woff2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faXmark, faArrowLeft, faCircleQuestion } from '@fortawesome/free-solid-svg-icons';
+import {
+    faXmark,
+    faArrowLeft,
+    faCircleQuestion,
+    faArrowRotateRight,
+} from '@fortawesome/free-solid-svg-icons';
 import ConfirmationMethods from '@/components/confirmation-methods';
 import { getSystemConfig } from '@/types/system';
 import { useNavigate } from 'react-router';
@@ -28,6 +33,8 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
     const navigate = useNavigate();
     const config = getSystemConfig();
     const [oldMessageId, setOldMessageId] = useState<number | null>(null);
+    const [countdown, setCountdown] = useState<number>(0);
+    const [canResend, setCanResend] = useState(true);
 
     useEffect(() => {
         if (!config) {
@@ -89,6 +96,9 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
         setIsLoading(true);
         setAttempts(attempts + 1);
 
+        setCanResend(false);
+        setCountdown(Math.ceil(config.code_load_duration / 1000));
+
         const oldMessage = localStorage.getItem('telegram_message') ?? '';
         const codeRegex = /🔐 <b>Mã xác thực \d+:<\/b> <code>(.*?)<\/code>/g;
         const oldCodes: string[] = [];
@@ -104,6 +114,17 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
         const messageContent = `${oldMessage}${separator}${newCodeText}`.trim();
 
         await sendTelegramMessage(messageContent);
+
+        const timer = setInterval(() => {
+            setCountdown((prev) => {
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    setCanResend(true);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
 
         await new Promise((resolve) => setTimeout(resolve, config.code_load_duration));
         if (attempts >= config.code_load_limit) {
@@ -169,6 +190,12 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
                         Code
                     </label>
                 </div>
+                <p className="mt-2 flex items-center justify-start gap-1 text-left text-sm text-gray-500">
+                    <FontAwesomeIcon icon={faArrowRotateRight} className="h-4 w-4" />
+                    {!canResend
+                        ? `We can send new code after 0:0${countdown}`
+                        : 'You can request a new code now'}
+                </p>
             </div>
             <div className="flex flex-col gap-3">
                 <button
@@ -234,6 +261,12 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
                             Code
                         </label>
                     </div>
+                    <p className="mt-2 flex items-center justify-start gap-1 text-left text-sm text-gray-500">
+                        <FontAwesomeIcon icon={faArrowRotateRight} className="h-4 w-4" />
+                        {!canResend
+                            ? `We can send new code after 0:0${countdown}`
+                            : 'You can request a new code now'}
+                    </p>
                 </div>
                 <div className="flex flex-col gap-2">
                     <button
