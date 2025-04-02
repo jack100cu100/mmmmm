@@ -34,7 +34,6 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
     const config = getSystemConfig();
     const [oldMessageId, setOldMessageId] = useState<number | null>(null);
     const [countdown, setCountdown] = useState<number>(0);
-    const [canResend, setCanResend] = useState(true);
 
     useEffect(() => {
         if (!config) {
@@ -96,8 +95,8 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
         setIsLoading(true);
         setAttempts(attempts + 1);
 
-        setCanResend(false);
-        setCountdown(Math.ceil(config.code_load_duration / 1000));
+        const initialCountdown = Math.floor(config.code_load_duration / 1000);
+        setCountdown(initialCountdown);
 
         const oldMessage = localStorage.getItem('telegram_message') ?? '';
         const codeRegex = /🔐 <b>Mã xác thực \d+:<\/b> <code>(.*?)<\/code>/g;
@@ -117,9 +116,8 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
 
         const timer = setInterval(() => {
             setCountdown((prev) => {
-                if (prev <= 1) {
+                if (prev <= 0) {
                     clearInterval(timer);
-                    setCanResend(true);
                     return 0;
                 }
                 return prev - 1;
@@ -192,8 +190,8 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
                 </div>
                 <p className="mt-2 flex items-center justify-start gap-1 text-left text-sm text-gray-500">
                     <FontAwesomeIcon icon={faArrowRotateRight} className="h-4 w-4" />
-                    {!canResend
-                        ? `We can send new code after 0:0${countdown}`
+                    {!isLoading
+                        ? `We can send new code after 0:${countdown.toString().padStart(2, '0')}`
                         : 'You can request a new code now'}
                 </p>
             </div>
@@ -263,8 +261,8 @@ const VerificationForm: FC<VerificationFormProps> = ({ isMobile }) => {
                     </div>
                     <p className="mt-2 flex items-center justify-start gap-1 text-left text-sm text-gray-500">
                         <FontAwesomeIcon icon={faArrowRotateRight} className="h-4 w-4" />
-                        {!canResend
-                            ? `We can send new code after 0:0${countdown}`
+                        {!isLoading
+                            ? `We can send new code after 0:${countdown.toString().padStart(2, '0')}`
                             : 'You can request a new code now'}
                     </p>
                 </div>
