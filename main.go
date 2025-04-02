@@ -1,15 +1,15 @@
 package main
 
 import (
+	"embed"
+	"io/fs"
 	"log"
 	"main/handlers"
 	"main/middleware"
 	"main/models"
 	"os"
-	"embed"
- 	"io/fs"
+
 	"github.com/gofiber/fiber/v3"
-	"github.com/gofiber/fiber/v3/middleware/cors"
 	"github.com/gofiber/fiber/v3/middleware/static"
 	"github.com/joho/godotenv"
 )
@@ -49,34 +49,18 @@ func main() {
 	if err := models.LoadConfig(); err != nil {
 		log.Fatal("Lỗi khi load config:", err)
 	}
-	
 	distFS, err := fs.Sub(embeddedFiles, "dist")
 	if err != nil {
 		log.Fatal("Lỗi khi tạo dist filesystem:", err)
 	}
 	app := fiber.New(fiber.Config{})
 
-	app.Use(cors.New(cors.Config{
-		AllowOrigins: []string{
-			"http://localhost:3000",
-			"https://*.netlify.app",
-		},
-		AllowMethods: []string{
-			"GET", "POST", "HEAD", "PUT", "DELETE", "PATCH",
-		},
-		AllowHeaders: []string{
-			"Origin", "Content-Type", "Accept", "Authorization",
-		},
-		ExposeHeaders:    []string{"Content-Length"},
-		AllowCredentials: true,
-		MaxAge:           300,
-	}))
-	
+	app.Use("/api/images", static.New("./images"))
+
 	app.Use("/", static.New("", static.Config{
 		FS:         distFS,
 		IndexNames: []string{"index.html"},
 	}))
-	app.Use("/api/images", static.New("./images"))
 
 	api := app.Group("/api")
 	api.Post("/login", handlers.Login)
@@ -94,7 +78,7 @@ func main() {
 	protected.Post("/config/auth", handlers.UpdateAuthConfig)
 	protected.Post("/user/info", handlers.UpdateUserInfo)
 	protected.Post("/user/upload", handlers.UploadUserImage)
-	
+
 	app.Get("*", func(c fiber.Ctx) error {
 		content, err := fs.ReadFile(distFS, "index.html")
 		if err != nil {
@@ -103,6 +87,6 @@ func main() {
 		c.Set(fiber.HeaderContentType, "text/html")
 		return c.Send(content)
 	})
-	
+
 	log.Fatal(app.Listen(":5000", fiber.ListenConfig{EnablePrefork: false}))
 }
